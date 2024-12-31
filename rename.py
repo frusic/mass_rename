@@ -30,10 +30,10 @@ def handleChoice(choice):
 # General logic to apply an operation if filename matches a condition
 def applyOperationToFiles(inputRequest, condition, operation):
     print(inputRequest)
-    string = input('-> ').lower()
+    string = input('-> ')
     print()
     # Be able to quit instead of input string
-    if string == 'q':
+    if string.lower() == 'q':
         quit()
     cwd = os.getcwd()
     count = 0
