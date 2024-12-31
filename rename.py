@@ -1,4 +1,5 @@
 import os
+import re
 
 # Start of program
 def startup():
@@ -6,32 +7,33 @@ def startup():
     print('Welcome to the Mass Rename Tool')
     print('===============================')
     print('Choices:')
-    print('    a) Remove a particular string from all files in current directory')
-    print('    b) This functionality does not exist yet')
+    print('    a) Remove specific string')
+    print('    b) Remove matching regex')
     print('    q) Exit program')
-    choice = input('-> ')
+    choice = input('-> ').lower()
     print()
     handleChoice(choice)
 
 # Handle input from startup
 def handleChoice(choice):
-    if choice == 'a' or choice == 'A':
-        print('You have chosen wisely')
+    if choice == 'a':
         removeMatchingStringsInDirectory()
-    elif choice == 'q' or choice == 'Q':
+    if choice == 'b':
+        removeRegexInDirectory()
+    elif choice == 'q':
         quit()
     else:
         print('Invalid option')
         print()
         startup()
 
-# Option A: Remove a particular string from all files in current directory
-def removeMatchingStringsInDirectory():
-    print('Please enter the exact string you would like removed, or quit')
-    string = input('-> ')
+# General logic to apply an operation if filename matches a condition
+def applyOperationToFiles(inputRequest, condition, operation):
+    print(inputRequest)
+    string = input('-> ').lower()
     print()
     # Be able to quit instead of input string
-    if string == 'q' or string == 'Q':
+    if string == 'q':
         quit()
     cwd = os.getcwd()
     count = 0
@@ -40,14 +42,32 @@ def removeMatchingStringsInDirectory():
         if not os.path.isfile(filename):
             continue
         # Rename by removing string
-        if string in filename:
-            os.rename(filename, filename.replace(string, ''))
+        if condition(string, filename):
+            operation(string, filename)
             count += 1
     print('Replaced', count, 'file(s).')
     print('-------------------------------')
     print()
     startup()
- 
+
+# Option A: Remove a particular string
+def removeMatchingStringsInDirectory():
+    def condition(string, filename):
+        return string in filename
+    def operation(string, filename):
+        os.rename(filename, filename.replace(string, ''))
+    inputRequest = 'Please enter the exact string, or quit'
+    applyOperationToFiles(inputRequest, condition, operation)
+
+# Option B: Replace all characters matching given regex
+def removeRegexInDirectory():
+    def condition(string, filename):
+        return re.search(string, filename) is not None
+    def operation(string, filename):
+        os.rename(filename, re.sub(string, '', filename))
+    inputRequest = 'Please enter the regex string, or quit'
+    applyOperationToFiles(inputRequest, condition, operation)
+
 # Run startup when running this file
-if __name__ == "__main__":
+if __name__ == '__main__':
     startup()
